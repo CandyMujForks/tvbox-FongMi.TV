@@ -1351,6 +1351,7 @@ public class VideoActivity extends PlaybackActivity implements VodPlaybackHost, 
 
     @Override
     public void onDiscMenuStateChanged(@NonNull DiscMenuState state) {
+        if (!isNativePlaybackCurrent()) return;
         super.onDiscMenuStateChanged(state);
         updateDiscMenuVisibility();
         if (isDiscMenuTransition()) hideProgress();
