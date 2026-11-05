@@ -163,7 +163,13 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
     }
 
     public static void cast(Activity activity, History history) {
-        start(activity, history.getSiteKey(), history.getVodId(), history.getVodName(), history.getVodPic());
+        history = history.copy();
+        history.setVodPic(ImgUtil.cache(history.getVodPic()));
+        Intent intent = new Intent(activity, VideoActivity.class);
+        intent.putExtra("key", history.getSiteKey()).putExtra("id", history.getVodId());
+        intent.putExtra("name", history.getVodName()).putExtra("history", history.toString());
+        putPic(intent, history.getVodPic());
+        activity.startActivity(intent);
     }
 
     public static void collect(Activity activity, String key, String id, String name, String pic) {
@@ -234,6 +240,13 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
         return getKey().concat(AppDatabase.SYMBOL).concat(getId()).concat(AppDatabase.SYMBOL) + VodConfig.getCid();
     }
 
+    @Override
+    public History takeCastHistory() {
+        History history = History.objectFrom(getIntent().getStringExtra("history"));
+        getIntent().removeExtra("history");
+        return history;
+    }
+
     private Site getSite() {
         return VodConfig.get().getSite(getKey());
     }
@@ -294,7 +307,7 @@ public class VideoActivity extends PlaybackActivity implements Clock.Callback, T
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        if (TextUtils.isEmpty(intent.getStringExtra("id")) || isSameVideo(intent)) return;
+        if (TextUtils.isEmpty(intent.getStringExtra("id")) || (isSameVideo(intent) && !intent.hasExtra("history"))) return;
         externalPlaybackCompleted = false;
         mBinding.swipeLayout.setRefreshing(true);
         saveHistory(true);
