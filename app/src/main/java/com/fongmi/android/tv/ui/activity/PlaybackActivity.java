@@ -670,6 +670,7 @@ public abstract class PlaybackActivity extends BaseActivity implements MediaCont
         }
         syncSeekPlayer();
         mController.addListener(this);
+        onVideoSizeChanged(mController.getVideoSize());
         updateKeyIncrement();
     }
 
